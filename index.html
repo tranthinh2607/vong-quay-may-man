@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vòng Quay May Mắn Cao Cấp</title>
+    <!-- Import Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Oswald:wght@500;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* CSS Variables cho Theming */
+        :root {
+            --bg-gradient-1: #0f172a;
+            --bg-gradient-2: #3b0764;
+            --bg-gradient-3: #1e1b4b;
+
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --secondary: #ec4899;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Montserrat', sans-serif;
+
+            --neon-glow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px var(--primary), 0 0 20px var(--primary);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Animated Gradient Background */
+            background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Layout Grid */
+        .app-container {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        /* Presentation Mode - Hide sidebars */
+        .app-container.presentation-mode {
+            grid-template-columns: 0px 1fr 0px;
+            gap: 0;
+        }
+
+        .app-container.presentation-mode .control-panel,
+        .app-container.presentation-mode .history-sidebar {
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Generic Class */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.5s ease;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* --- Control Panel --- */
+        .control-panel {
+            gap: 20px;
+        }
+
+        .panel-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(#fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input[type="number"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: var(--font-body);
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .row-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        input[type="checkbox"]:checked+.toggle-switch {
+            background: var(--success);
+        }
+
+        input[type="checkbox"]:checked+.toggle-switch::after {
+            transform: translateX(20px);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            justify-content: space-around;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            display: inline-block;
+            width: auto;
+        }
+
+        /* --- Main Board --- */
+        .main-board {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .top-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .icon-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: 0.3s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .result-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            width: 100%;
+            text-align: center;
+            perspective: 1000px;
+        }
+
+        .result-item {
+            font-family: var(--font-display);
+            font-size: 8rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin: 10px 0;
+            transform-style: preserve-3d;
+            transition: all 0.1s;
+        }
+
+        /* Winning Effect */
+        .result-winner {
+            animation: winPulse 1s ease-out forwards;
+        }
+
+        @keyframes winPulse {
+            0% {
+                transform: scale(1);
+                text-shadow: none;
+            }
+
+            50% {
+                transform: scale(1.15) rotate(2deg);
+                text-shadow: var(--neon-glow);
+            }
+
+            100% {
+                transform: scale(1.1);
+                text-shadow: var(--neon-glow);
+                color: #fff;
+            }
+        }
+
+        .btn-spin {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border: none;
+            padding: 20px 60px;
+            font-size: 2rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-spin::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: skewX(-20deg);
+        }
+
+        .btn-spin:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-spin:hover::after {
+            animation: shine 1.5s infinite;
+        }
+
+        .btn-spin:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 200%;
+            }
+        }
+
+        /* --- History Sidebar --- */
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .history-val {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-outline {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-outline.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 300px 1fr 250px;
+            }
+
+            .result-item {
+                font-size: 6rem;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                height: auto;
+            }
+
+            .history-sidebar {
+                max-height: 400px;
+            }
+
+            .btn-spin {
+                margin-bottom: 40px;
+            }
+        }
+
+        /* Utils */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container" id="appContainer">
+        <!-- LEFT: Control Panel -->
+        <aside class="glass-panel control-panel">
+            <h2 class="panel-header"><i class="fa-solid fa-sliders"></i> Cài đặt</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-target="numberMode">Quay Số</button>
+                <button class="tab-btn" data-target="nameMode">Bốc Thăm</button>
+            </div>
+
+            <div id="numberMode" class="mode-section">
+                <div class="row-group">
+                    <div class="input-group">
+                        <label>Từ (Min)</label>
+                        <input type="number" id="numMin" value="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Đến (Max)</label>
+                        <input type="number" id="numMax" value="100">
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" id="filterOdd"> Chỉ số lẻ</label>
+                    <label class="checkbox-label"><input type="checkbox" id="filterEven"> Chỉ số chẵn</label>
+                </div>
+            </div>
+
+            <div id="nameMode" class="mode-section hidden">
+                <div class="input-group">
+                    <label>Danh sách chữ (mỗi ô 1 dòng)</label>
+                    <textarea id="nameList" placeholder="Ví dụ:&#10;Nguyễn Văn A&#10;Trần Thị B"></textarea>
+                    <small style="color:var(--text-muted); font-size:0.75rem; text-align:right" id="nameCount">0
+                        mục</small>
+                </div>
+            </div>
+
+            <div class="row-group" style="margin-top:10px;">
+                <div class="input-group">
+                    <label>Thời gian (giây)</label>
+                    <input type="number" id="spinDuration" value="3" min="1" max="15">
+                </div>
+                <div class="input-group">
+                    <label>Số giải/lần</label>
+                    <input type="number" id="drawCount" value="1" min="1" max="10">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Loại trừ (cách nhau bởi dấu phẩy)</label>
+                <input type="text" id="blacklist" placeholder="Ví dụ: 13, 42, Hùng">
+            </div>
+
+            <label class="toggle-container">
+                <span style="font-weight:600; font-size:0.9rem;">Không lặp lại kết quả</span>
+                <input type="checkbox" id="uniqueToggle" checked>
+                <div class="toggle-switch"></div>
+            </label>
+        </aside>
+
+        <!-- CENTER: Main Board -->
+        <main class="main-board">
+            <div class="top-controls">
+                <button class="icon-btn" id="btnSound" title="Bật/tắt âm thanh">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button class="icon-btn" id="btnFullscreen" title="Toàn màn hình">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="result-display" id="resultDisplay">
+                <div class="result-item" id="mainResult">000</div>
+            </div>
+
+            <button class="btn-spin" id="btnSpin">QUAY NGAY <i class="fa-solid fa-rotate-right"></i></button>
+        </main>
+
+        <!-- RIGHT: History -->
+        <aside class="glass-panel history-sidebar">
+            <h2 class="panel-header"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử</h2>
+
+            <div class="history-list" id="historyList">
+                <!-- Items injected by JS -->
+            </div>
+
+            <div class="history-actions">
+                <button class="btn-outline danger" id="btnClearHistory"><i class="fa-solid fa-trash"></i> Xóa lịch
+                    sử</button>
+                <button class="btn-outline" id="btnExportCSV"><i class="fa-solid fa-file-csv"></i> Xuất File
+                    CSV</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        /**
+         * Random Generator Core Module
+         * Uses Crypto API for true randomness
+         */
+        class CryptoRandomUtils {
+            /**
+             * Generate a cryptographically secure random number between min and max (inclusive)
+             */
+            static getRandomInt(min, max) {
+                if (min > max) [min, max] = [max, min];
+                const range = max - min + 1;
+                const maxSafe = Math.floor((2 ** 32 - 1) / range) * range;
+
+                let randomValue;
+                do {
+                    const array = new Uint32Array(1);
+                    window.crypto.getRandomValues(array);
+                    randomValue = array[0];
+                } while (randomValue >= maxSafe); // Reject bias
+
+                return min + (randomValue % range);
+            }
+        }
+
+        /**
+         * App Controller
+         */
+        class RandomGeneratorApp {
+            constructor() {
+                this.currentMode = 'number'; // 'number' | 'name'
+                this.isSpinning = false;
+                this.soundEnabled = true;
+                this.history = JSON.parse(localStorage.getItem('randomGenHistory')) || [];
+                this.drawnPool = new Set(); // For unique mode
+
+                // Audio contexts (using base64 or public domains to avoid local path issues)
+                // using short placeholder beeps using Web Audio API to ensure it works without external assets
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                this.initDOM();
+                this.bindEvents();
+                this.renderHistory();
+            }
+
+            initDOM() {
+                this.appContainer = document.getElementById('appContainer');
+                this.resultDisplay = document.getElementById('resultDisplay');
+                this.btnSpin = document.getElementById('btnSpin');
+                this.historyList = document.getElementById('historyList');
+
+                // Tabs
+                this.tabBtns = document.querySelectorAll('.tab-btn');
+                this.modeSections = document.querySelectorAll('.mode-section');
+
+                // Inputs
+                this.nameTextArea = document.getElementById('nameList');
+                this.nameCount = document.getElementById('nameCount');
+            }
+
+            bindEvents() {
+                // Tab switching
+                this.tabBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.tabBtns.forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+
+                        this.modeSections.forEach(sec => sec.classList.add('hidden'));
+                        document.getElementById(e.target.dataset.target).classList.remove('hidden');
+
+                        this.currentMode = e.target.dataset.target === 'numberMode' ? 'number' : 'name';
+                    });
+                });
+
+                // Name list counter dynamically
+                this.nameTextArea.addEventListener('input', () => {
+                    const count = this.getValidNames().length;
+                    this.nameCount.textContent = `${count} mục`;
+                });
+
+                // Spin Action
+                this.btnSpin.addEventListener('click', () => this.startSpinning());
+
+                // Fullscreen
+                document.getElementById('btnFullscreen').addEventListener('click', () => this.toggleFullscreen());
+
+                // Sound
+                const btnSound = document.getElementById('btnSound');
+                btnSound.addEventListener('click', () => {
+                    this.soundEnabled = !this.soundEnabled;
+                    btnSound.innerHTML = this.soundEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+                });
+
+                // History Actions
+                document.getElementById('btnClearHistory').addEventListener('click', () => {
+                    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử không?')) {
+                        this.history = [];
+                        this.drawnPool.clear();
+                        this.saveHistory();
+                        this.renderHistory();
+                    }
+                });
+
+                document.getElementById('btnExportCSV').addEventListener('click', () => this.exportCSV());
+
+                // Exclusive Checkboxes (Odd/Even)
+                const filterOdd = document.getElementById('filterOdd');
+                const filterEven = document.getElementById('filterEven');
+                filterOdd.addEventListener('change', () => { if (filterOdd.checked) filterEven.checked = false; });
+                filterEven.addEventListener('change', () => { if (filterEven.checked) filterOdd.checked = false; });
+            }
+
+            // --- AUDIO SYSTEM (Generated natively) ---
+            playSound(type) {
+                if (!this.soundEnabled) return;
+
+                const oscillator = this.audioCtx.createOscillator();
+                const gainNode = this.audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioCtx.destination);
+
+                if (type === 'tick') {
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(800, this.audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(0.05, this.audioCtx.currentTime);
+                    oscillator.start();
+                    oscillator.stop(this.audioCtx.currentTime + 0.05);
+                } else if (type === 'win') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(400, this.audioCtx.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, this.audioCtx.currentTime + 0.5);
+                    gainNode.gain.setValueAtTime(0.2, this.audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 1);
+                    oscillator.start();
+                    oscillator.stop(this.audioCtx.currentTime + 1);
+                }
+            }
+
+            getValidNames() {
+                const raw = this.nameTextArea.value;
+                return raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+            }
+
+            getBlacklist() {
+                const raw = document.getElementById('blacklist').value;
+                return raw.split(',').map(v => v.trim()).filter(v => v.length > 0);
+            }
+
+            buildPool() {
+                const pool = [];
+                const blacklist = this.getBlacklist();
+                const requireUnique = document.getElementById('uniqueToggle').checked;
+
+                if (this.currentMode === 'number') {
+                    const min = parseInt(document.getElementById('numMin').value) || 0;
+                    const max = parseInt(document.getElementById('numMax').value) || 100;
+                    const filterOdd = document.getElementById('filterOdd').checked;
+                    const filterEven = document.getElementById('filterEven').checked;
+
+                    for (let i = min; i <= max; i++) {
+                        if (filterOdd && i % 2 === 0) continue;
+                        if (filterEven && i % 2 !== 0) continue;
+
+                        const strVal = i.toString();
+                        if (blacklist.includes(strVal)) continue;
+                        if (requireUnique && this.drawnPool.has(strVal)) continue;
+
+                        pool.push(strVal);
+                    }
+                } else {
+                    const names = this.getValidNames();
+                    for (const name of names) {
+                        if (blacklist.includes(name)) continue;
+                        if (requireUnique && this.drawnPool.has(name)) continue;
+
+                        pool.push(name);
+                    }
+                }
+
+                return pool;
+            }
+
+            async startSpinning() {
+                if (this.isSpinning) return;
+
+                const count = parseInt(document.getElementById('drawCount').value) || 1;
+
+                // Ensure Audio context is resumed (browser policy workaround)
+                if (this.audioCtx.state === 'suspended') {
+                    await this.audioCtx.resume();
+                }
+
+                const pool = this.buildPool();
+
+                if (pool.length < count) {
+                    alert(`Không đủ ô trống/kết quả hợp lệ để quay! Hiện có: ${pool.length}, Yêu cầu: ${count}`);
+                    return;
+                }
+
+                this.isSpinning = true;
+                this.btnSpin.disabled = true;
+
+                // Presentation effect - Dim UI
+                this.appContainer.classList.add('presentation-mode');
+
+                // Prepare display area
+                this.resultDisplay.innerHTML = '';
+                const slots = [];
+                for (let i = 0; i < count; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'result-item';
+                    el.textContent = '...';
+                    this.resultDisplay.appendChild(el);
+                    slots.push(el);
+                }
+
+                const finalResults = [];
+                // Pull unique random indices for the final result
+                const poolCopy = [...pool];
+                for (let i = 0; i < count; i++) {
+                    const idx = CryptoRandomUtils.getRandomInt(0, poolCopy.length - 1);
+                    finalResults.push(poolCopy[idx]);
+                    poolCopy.splice(idx, 1); // remove from copy to prevent dupes in same draw
+                }
+
+                // --- Animation Engine (Odometer / Slot Machine logic) ---
+                const spinDurationSec = parseFloat(document.getElementById('spinDuration').value) || 3;
+                const DURATION = spinDurationSec * 1000; // ms
+                const FRAMERATE = 1000 / 60;
+                const totalFrames = DURATION / FRAMERATE;
+                let frame = 0;
+                let lastUpdateFrames = new Array(count).fill(0);
+
+                const animate = () => {
+                    frame++;
+
+                    // Calculate linear progress and an ease-out curve progress
+                    const progress = frame / totalFrames;
+                    const easeOutProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+                    for (let i = 0; i < count; i++) {
+                        // Spread out the stops so that the very last one stops at exactly progress = 1.0 (no delay)
+                        const stopThreshold = 1.0 - ((count - 1 - i) * (0.1 / Math.max(1, count)));
+
+                        if (progress < stopThreshold) { // use linear progress so it spans the entire DURATION
+                            // Decrease flashing text update frequency towards the end to simulate slowing down
+                            const framesToWait = Math.floor(easeOutProgress * 8) + 1;
+                            if (frame - lastUpdateFrames[i] >= framesToWait) {
+                                slots[i].textContent = pool[CryptoRandomUtils.getRandomInt(0, pool.length - 1)];
+                                lastUpdateFrames[i] = frame;
+                                if (i === 0) this.playSound('tick');
+                            }
+
+                            slots[i].style.filter = `blur(${Math.max(0, 4 - easeOutProgress * 4)}px)`;
+                            slots[i].style.transform = `translateY(${CryptoRandomUtils.getRandomInt(-5, 5)}px)`;
+                        } else {
+                            slots[i].textContent = finalResults[i];
+                            slots[i].style.filter = 'none';
+                            slots[i].style.transform = 'translateY(0)';
+                        }
+                    }
+
+                    if (frame < totalFrames) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        this.finalizeSpin(slots, finalResults);
+                    }
+                };
+
+                requestAnimationFrame(animate);
+            }
+
+            finalizeSpin(slotElements, results) {
+                this.playSound('win');
+
+                // Apply winning CSS
+                slotElements.forEach(el => el.classList.add('result-winner'));
+
+                // Confetti!
+                this.triggerConfetti();
+
+                // Restore UI after a delay
+                setTimeout(() => {
+                    this.appContainer.classList.remove('presentation-mode');
+                    this.isSpinning = false;
+                    this.btnSpin.disabled = false;
+                }, 2000);
+
+                // Save Results
+                const requireUnique = document.getElementById('uniqueToggle').checked;
+                const now = new Date().toLocaleString('vi-VN');
+
+                results.forEach(res => {
+                    if (requireUnique) this.drawnPool.add(res);
+                    this.history.unshift({
+                        time: now,
+                        mode: this.currentMode,
+                        value: res
+                    });
+                });
+
+                this.saveHistory();
+                this.renderHistory();
+            }
+
+            triggerConfetti() {
+                var duration = 3 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: CryptoRandomUtils.getRandomInt(10, 30) / 100, y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: CryptoRandomUtils.getRandomInt(70, 90) / 100, y: Math.random() - 0.2 } }));
+                }, 250);
+            }
+
+            saveHistory() {
+                // Keep max 100 history items so localstorage doesn't bloat
+                if (this.history.length > 100) this.history = this.history.slice(0, 100);
+                localStorage.setItem('randomGenHistory', JSON.stringify(this.history));
+            }
+
+            renderHistory() {
+                this.historyList.innerHTML = '';
+                this.history.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'history-item';
+                    const modeText = item.mode === 'number' ? 'SỐ' : 'TÊN';
+                    el.innerHTML = `
+                <div class="history-time">${item.time} - [${modeText}]</div>
+                <div class="history-val">${item.value}</div>
+            `;
+                    this.historyList.appendChild(el);
+                });
+            }
+
+            exportCSV() {
+                if (this.history.length === 0) return alert('Không có lịch sử nào để xuất!');
+
+                let csvContent = "data:text/csv;charset=utf-8,Thời gian,Chế độ,Kết quả\n";
+                this.history.forEach(row => {
+                    csvContent += `"${row.time}","${row.mode === 'number' ? 'Số' : 'Tên'}","${row.value}"\n`;
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `ket_qua_quay_${new Date().getTime()}.csv`);
+                document.body.appendChild(link); // Required for FF
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new RandomGeneratorApp();
+        });
+    </script>
+</body>
+
+</html>
