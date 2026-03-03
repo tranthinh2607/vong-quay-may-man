@@ -194,6 +194,79 @@
             min-height: 120px;
         }
 
+        /* Custom Stepper Component */
+        .custom-stepper-wrapper {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            background: rgba(0, 0, 0, 0.2);
+            /* Dark navy */
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .custom-stepper-wrapper:focus-within {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .custom-stepper-wrapper input[type="number"] {
+            border: none !important;
+            background: transparent !important;
+            padding: 12px 15px !important;
+            border-radius: 0 !important;
+            margin: 0;
+            width: 100%;
+        }
+
+        /* Hide default spin buttons */
+        .custom-stepper-wrapper input[type="number"]::-webkit-outer-spin-button,
+        .custom-stepper-wrapper input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .custom-stepper-wrapper input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        .stepper-controls {
+            display: flex;
+            flex-direction: column;
+            width: 32px;
+            background: #f8fafc;
+            /* Nền khối trắng */
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stepper-controls button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #475569;
+            /* Mũi tên màu xám đậm */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            outline: none;
+            padding: 0;
+        }
+
+        .stepper-controls button:hover {
+            background: #e2e8f0;
+            color: var(--primary);
+        }
+
+        .stepper-controls button:active {
+            background: #cbd5e1;
+        }
+
         .row-group {
             display: flex;
             gap: 15px;
@@ -543,11 +616,27 @@
             <div class="row-group" style="margin-top:10px;">
                 <div class="input-group">
                     <label>Thời gian (giây)</label>
-                    <input type="number" id="spinDuration" value="3" min="1" max="15">
+                    <div class="custom-stepper-wrapper">
+                        <input type="number" id="spinDuration" value="3" min="1" max="15">
+                        <div class="stepper-controls">
+                            <button type="button" class="btn-step up" data-target="spinDuration"><i
+                                    class="fa-solid fa-caret-up"></i></button>
+                            <button type="button" class="btn-step down" data-target="spinDuration"><i
+                                    class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label>Số giải/lần</label>
-                    <input type="number" id="drawCount" value="1" min="1" max="10">
+                    <div class="custom-stepper-wrapper">
+                        <input type="number" id="drawCount" value="1" min="1" max="10">
+                        <div class="stepper-controls">
+                            <button type="button" class="btn-step up" data-target="drawCount"><i
+                                    class="fa-solid fa-caret-up"></i></button>
+                            <button type="button" class="btn-step down" data-target="drawCount"><i
+                                    class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -711,6 +800,27 @@
                 const filterEven = document.getElementById('filterEven');
                 filterOdd.addEventListener('change', () => { if (filterOdd.checked) filterEven.checked = false; });
                 filterEven.addEventListener('change', () => { if (filterEven.checked) filterOdd.checked = false; });
+
+                // Custom Stepper Logic
+                document.querySelectorAll('.btn-step').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const targetId = e.currentTarget.dataset.target;
+                        const input = document.getElementById(targetId);
+                        const isUp = e.currentTarget.classList.contains('up');
+
+                        let val = parseInt(input.value) || 0;
+                        const min = parseInt(input.min) !== NaN ? parseInt(input.min) : -Infinity;
+                        const max = parseInt(input.max) !== NaN ? parseInt(input.max) : Infinity;
+
+                        if (isUp) val++;
+                        else val--;
+
+                        if (val < min) val = min;
+                        if (val > max) val = max;
+
+                        input.value = val;
+                    });
+                });
             }
 
             // --- AUDIO SYSTEM (Generated natively) ---
