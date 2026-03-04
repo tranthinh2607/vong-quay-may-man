@@ -535,19 +535,33 @@ class RandomGeneratorApp {
     exportCSV() {
         if (this.history.length === 0) return alert('Không có lịch sử nào để xuất!');
 
-        let csvContent = "data:text/csv;charset=utf-8,Thời gian,Hạng giải,Chế độ,Kết quả\n";
+        let csvContent = "Thời gian,Hạng giải,Chế độ,Kết quả\n";
         this.history.forEach(row => {
             const tierEscape = row.tier ? row.tier.replace(/"/g, '""') : '';
             csvContent += `"${row.time}","${tierEscape}","${row.mode === 'number' ? 'Số' : 'Tên'}","${row.value}"\n`;
         });
 
-        const encodedUri = encodeURI(csvContent);
+        // 1. Khởi tạo mảng byte BOM cho UTF-8
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+
+        // 2. Nối mảng byte BOM này vào TRƯỚC chuỗi nội dung CSV khi tạo Blob
+        const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        // Tạo tên file chứa ngày tháng chuẩn
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const fileName = `Lich_Su_Quay_So_${dd}${mm}${yyyy}.csv`;
+
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `ket_qua_quay_${new Date().getTime()}.csv`);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
         document.body.appendChild(link); // Required for FF
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 
     toggleFullscreen() {
