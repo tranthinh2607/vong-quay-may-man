@@ -434,6 +434,31 @@ class RandomGeneratorApp {
 
                 pool.push(name);
             }
+            
+            // Generate numbers for Scratch Mode if inputs are provided
+            if (mode === 'scratch') {
+                const sMinRaw = document.getElementById('scratchNumMin').value;
+                const sMaxRaw = document.getElementById('scratchNumMax').value;
+                
+                if (sMinRaw !== '' && sMaxRaw !== '') {
+                    const min = parseInt(sMinRaw);
+                    const max = parseInt(sMaxRaw);
+                    const filterOdd = document.getElementById('scratchFilterOdd').checked;
+                    const filterEven = document.getElementById('scratchFilterEven').checked;
+                    
+                    if (!isNaN(min) && !isNaN(max) && min <= max) {
+                        for (let i = min; i <= max; i++) {
+                            if (filterOdd && i % 2 === 0) continue;
+                            if (filterEven && i % 2 !== 0) continue;
+                            
+                            const strVal = i.toString();
+                            if (blacklist.includes(strVal)) continue;
+                            // Scratch mode ignores requireUnique when generating grid
+                            pool.push(strVal);
+                        }
+                    }
+                }
+            }
         }
 
         return pool;

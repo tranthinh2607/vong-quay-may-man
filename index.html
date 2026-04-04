@@ -69,19 +69,41 @@
                     <small style="color:var(--text-muted); font-size:0.75rem; text-align:right" id="nameCount">0
                         mục</small>
                 </div>
-                
+
                 <!-- Prize Management Section -->
                 <div class="prize-management">
-                    <label style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:10px; display:block;">Cơ cấu giải thưởng</label>
+                    <label
+                        style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:10px; display:block;">Cơ
+                        cấu giải thưởng</label>
                     <div class="prize-list" id="prizeList">
                         <!-- Items injected by JS -->
                     </div>
-                    <button class="btn-add-prize" id="btnAddPrize"><i class="fa-solid fa-plus"></i> Thêm hạng giải</button>
+                    <button class="btn-add-prize" id="btnAddPrize"><i class="fa-solid fa-plus"></i> Thêm hạng
+                        giải</button>
                 </div>
             </div>
 
             <div id="scratchMode" class="mode-section hidden">
-                <div class="input-group">
+                <div class="row-group">
+                    <div class="input-group">
+                        <label>Từ (Min)</label>
+                        <div class="custom-stepper-wrapper">
+                            <input type="number" id="scratchNumMin" placeholder="Trống">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Đến (Max)</label>
+                        <div class="custom-stepper-wrapper">
+                            <input type="number" id="scratchNumMax" placeholder="Trống">
+                        </div>
+                    </div>
+                </div>
+                <div class="checkbox-group" style="margin-bottom: 10px;">
+                    <label class="checkbox-label"><input type="checkbox" id="scratchFilterOdd"> Chỉ số lẻ</label>
+                    <label class="checkbox-label"><input type="checkbox" id="scratchFilterEven"> Chỉ số chẵn</label>
+                </div>
+
+                <div class="input-group" style="margin-top: 33px;">
                     <label>Danh sách giải sẽ giấu (mỗi ô 1 dòng)</label>
                     <textarea id="scratchList" placeholder="Ví dụ:&#10;Trúng 500k&#10;Trượt&#10;Trượt"></textarea>
                     <small style="color:var(--text-muted); font-size:0.75rem; text-align:right" id="scratchCount">0
@@ -174,8 +196,12 @@
 
             <button class="btn-spin" id="btnSpin">QUAY NGAY <i class="fa-solid fa-rotate-right"></i></button>
             <div class="scratch-actions hidden" id="scratchActions">
-                <button class="btn-spin" id="btnCreateScratch" style="background:var(--secondary); font-size:1.5rem; padding: 15px 40px;">SINH DÀN THẺ <i class="fa-solid fa-ticket"></i></button>
-                <button class="btn-spin hidden" id="btnBackToGrid" style="background:#4b5563; font-size:1.5rem; padding: 15px 40px; margin-left: 10px;">TIẾP TỤC CÀO <i class="fa-solid fa-rotate-left"></i></button>
+                <button class="btn-spin" id="btnCreateScratch"
+                    style="background:var(--secondary); font-size:1.5rem; padding: 15px 40px;">SINH DÀN THẺ <i
+                        class="fa-solid fa-ticket"></i></button>
+                <button class="btn-spin hidden" id="btnBackToGrid"
+                    style="background:#4b5563; font-size:1.5rem; padding: 15px 40px; margin-left: 10px;">TIẾP TỤC CÀO <i
+                        class="fa-solid fa-rotate-left"></i></button>
             </div>
         </main>
 
