@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thẻ Cào May Mắn</title>
+    <link rel="stylesheet" href="scratch.css">
+</head>
+<body>
+    
+    <div class="scratch-container" id="scratchContainer">
+        <!-- Lớp Layer 1 (Bên dưới): Trả kết quả giải thưởng -->
+        <div class="result-layer" id="resultLayer">
+            <!-- Hiển thị "Đang xử lý..." trước khi lấy dữ liệu mock API -->
+            <h2 id="prizeText">Đang xoay dữ liệu...</h2>
+        </div>
+
+        <!-- Lớp Layer 2 (Bên trên): Canvas thẻ cào -->
+        <canvas id="scratchCanvas"></canvas>
+    </div>
+
+    <!-- Tải logic -->
+    <script src="scratch.js"></script>
+</body>
+</html>

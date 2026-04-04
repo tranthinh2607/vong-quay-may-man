@@ -41,17 +41,36 @@ body {
 
 /* Base Layout Grid */
 .app-container {
+    --left-width: 350px;
+    --right-width: 300px;
     display: grid;
-    grid-template-columns: 350px 1fr 300px;
+    grid-template-columns: var(--left-width) 1fr var(--right-width);
     gap: 20px;
     padding: 20px;
     height: 100vh;
-    transition: all 0.5s ease;
+    transition: grid-template-columns 0.5s ease, gap 0.5s ease;
+}
+
+.app-container.left-collapsed {
+    --left-width: 0px;
+}
+.app-container.right-collapsed {
+    --right-width: 0px;
+}
+
+.app-container.left-collapsed .control-panel,
+.app-container.right-collapsed .history-sidebar {
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    padding: 0;
+    border: none;
 }
 
 /* Presentation Mode - Hide sidebars */
 .app-container.presentation-mode {
-    grid-template-columns: 0px 1fr 0px;
+    --left-width: 0px;
+    --right-width: 0px;
     gap: 0;
 }
 
@@ -403,6 +422,102 @@ input[type="checkbox"]:checked+.toggle-switch::after {
         color: #f1f5f9;
         /* Softer text color */
     }
+}
+
+/* Scratch Card Feature Styles */
+.scratch-grid-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.scratch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    justify-content: center;
+}
+
+.scratch-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mystery-card {
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.mystery-card:hover {
+    transform: translateY(-5px) scale(1.05);
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
+}
+
+.mystery-card.scratched {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+}
+
+.scratch-container {
+    position: relative;
+    width: 400px;
+    height: 200px;
+    margin: 20px auto;
+    user-select: none;
+    border-radius: 14px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.result-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-main);
+    border: 3px dashed var(--primary);
+    border-radius: 14px;
+    z-index: 1;
+    color: var(--text-main);
+    text-align: center;
+    padding: 20px;
+}
+
+#scratchPrizeText {
+    font-size: 4.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--primary);
+}
+
+#scratchCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    border-radius: 14px;
+    cursor: grab;
+    transition: opacity 0.5s ease;
+}
+
+#scratchCanvas:active {
+    cursor: grabbing;
+}
+
+.fade-out {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .btn-spin {

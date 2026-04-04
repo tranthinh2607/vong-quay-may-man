@@ -1,0 +1,65 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Khu vực thẻ cào thiết lập kích thước tĩnh */
+.scratch-container {
+    position: relative;
+    width: 320px;
+    height: 160px;
+    user-select: none; /* Tránh bôi đen text khi thao tác cào */
+}
+
+/* Thẻ kết quả phía dưới */
+.result-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    border: 3px dashed #f59e0b; /* Viền thẻ cào đứt khúc */
+    border-radius: 14px;
+    z-index: 1; /* z-index thấp */
+    color: #b45309;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Canvas lớp nhũ bạc đè lên trên */
+#scratchCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2; /* z-index cao hơn Layer kết quả */
+    border-radius: 12px;
+    cursor: grab;
+    transition: opacity 0.5s ease; /* Fade-out mượt trong nửa giây */
+}
+
+#scratchCanvas:active {
+    cursor: grabbing;
+}
+
+/* Class fade-out được gọi thông qua JavaScript (khi cào trên 50%) */
+.fade-out {
+    opacity: 0;
+    pointer-events: none; /* Chặn click xuống lớp canvas đã trong suốt để tương tác dc với nút layer dưới nếu có */
+}

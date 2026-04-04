@@ -60,12 +60,21 @@ class RandomGeneratorApp {
         // Inputs
         this.nameTextArea = document.getElementById('nameList');
         this.nameCount = document.getElementById('nameCount');
+        
+        // Scratch
+        this.scratchTextArea = document.getElementById('scratchList');
+        this.scratchCount = document.getElementById('scratchCount');
     }
 
     bindEvents() {
         // Tab switching
         this.tabBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
+                if (this.isSpinning) {
+                    alert("Vui lòng đợi hệ thống Quay số hoặc Thẻ cào xử lý xong trước khi chuyển Tab!");
+                    return;
+                }
+
                 this.tabBtns.forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
 
@@ -73,17 +82,49 @@ class RandomGeneratorApp {
                 const targetId = e.target.dataset.target;
                 document.getElementById(targetId).classList.remove('hidden');
 
-                this.currentMode = targetId === 'numberMode' ? 'number' : 'name';
+                this.currentMode = targetId.replace('Mode', ''); // 'number', 'name', 'scratch'
 
                 // Show/hide prize selector accordingly
                 const prizeSelectorWrapper = document.getElementById('prizeSelectorWrapper');
                 const prizeHeading = document.getElementById('prizeHeading');
+                const scratchContainer = document.getElementById('scratchContainer');
+                const btnCreateScratch = document.getElementById('btnCreateScratch');
+                
+                const spinConfigGroup = document.getElementById('spinConfigGroup');
+                const blacklistGroup = document.getElementById('blacklistGroup');
+
                 if (this.currentMode === 'number') {
                     prizeSelectorWrapper.classList.add('hidden');
                     prizeHeading.style.display = 'none';
-                } else {
+                    this.resultDisplay.classList.remove('hidden');
+                    document.getElementById('scratchGridWrapper').classList.add('hidden');
+                    scratchContainer.classList.add('hidden');
+                    document.getElementById('scratchActions').classList.add('hidden');
+                    this.btnSpin.classList.remove('hidden');
+                    spinConfigGroup.classList.remove('hidden');
+                    blacklistGroup.classList.remove('hidden');
+                } else if (this.currentMode === 'name') {
                     prizeSelectorWrapper.classList.remove('hidden');
                     document.getElementById('prizeSelect').dispatchEvent(new Event('change'));
+                    this.resultDisplay.classList.remove('hidden');
+                    document.getElementById('scratchGridWrapper').classList.add('hidden');
+                    scratchContainer.classList.add('hidden');
+                    document.getElementById('scratchActions').classList.add('hidden');
+                    this.btnSpin.classList.remove('hidden');
+                    spinConfigGroup.classList.remove('hidden');
+                    blacklistGroup.classList.remove('hidden');
+                } else if (this.currentMode === 'scratch') {
+                    prizeSelectorWrapper.classList.add('hidden'); // Scratch uses internal list
+                    prizeHeading.style.display = 'none';
+                    this.resultDisplay.classList.add('hidden');
+                    document.getElementById('scratchGridWrapper').classList.add('hidden');
+                    scratchContainer.classList.add('hidden');
+                    document.getElementById('scratchActions').classList.remove('hidden');
+                    this.btnSpin.classList.add('hidden');
+                    btnCreateScratch.classList.remove('hidden');
+                    document.getElementById('btnBackToGrid').classList.add('hidden');
+                    spinConfigGroup.classList.add('hidden');
+                    blacklistGroup.classList.add('hidden');
                 }
             });
         });
@@ -94,11 +135,43 @@ class RandomGeneratorApp {
             this.nameCount.textContent = `${count} mục`;
         });
 
+        // Scratch list counter dynamically
+        this.scratchTextArea.addEventListener('input', () => {
+            const count = this.getValidNames('scratch').length;
+            this.scratchCount.textContent = `${count} mục`;
+        });
+
         // Spin Action
         this.btnSpin.addEventListener('click', () => this.startSpinning());
+        document.getElementById('btnCreateScratch').addEventListener('click', () => this.generateScratchGrid());
+        document.getElementById('btnBackToGrid').addEventListener('click', () => {
+            document.getElementById('scratchContainer').classList.add('hidden');
+            document.getElementById('btnBackToGrid').classList.add('hidden');
+
+            const remainingCards = document.querySelectorAll('.mystery-card:not(.scratched)');
+            if (remainingCards.length === 0) {
+                // If no cards are left, return to initial mode to generate a new grid
+                document.getElementById('scratchGridWrapper').classList.add('hidden');
+                const btnCreateScratch = document.getElementById('btnCreateScratch');
+                btnCreateScratch.classList.remove('hidden');
+                btnCreateScratch.disabled = false;
+                document.querySelector('.result-display').classList.add('hidden');
+            } else {
+                // Show the grid again
+                document.getElementById('scratchGridWrapper').classList.remove('hidden');
+            }
+        });
 
         // Fullscreen
         document.getElementById('btnFullscreen').addEventListener('click', () => this.toggleFullscreen());
+
+        // Sidebar Toggles
+        document.getElementById('btnToggleLeft').addEventListener('click', () => {
+            this.appContainer.classList.toggle('left-collapsed');
+        });
+        document.getElementById('btnToggleRight').addEventListener('click', () => {
+            this.appContainer.classList.toggle('right-collapsed');
+        });
 
         // Sound
         const btnSound = document.getElementById('btnSound');
@@ -320,9 +393,9 @@ class RandomGeneratorApp {
         }
     }
 
-    getValidNames() {
-        const raw = this.nameTextArea.value;
-        return raw.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+    getValidNames(targetMode = null) {
+        const source = targetMode === 'scratch' ? this.scratchTextArea.value : this.nameTextArea.value;
+        return source.split('\n').map(n => n.trim()).filter(n => n.length > 0);
     }
 
     getBlacklist() {
@@ -352,10 +425,12 @@ class RandomGeneratorApp {
                 pool.push(strVal);
             }
         } else {
-            const names = this.getValidNames();
+            const mode = this.currentMode === 'scratch' ? 'scratch' : 'name';
+            const names = this.getValidNames(mode);
             for (const name of names) {
                 if (blacklist.includes(name)) continue;
-                if (requireUnique && this.drawnPool.has(name)) continue;
+                // Đối với thẻ cào, luôn sinh ra tổng lượng thẻ dựa theo danh sách gốc, bỏ qua check Unique so với history cũ
+                if (mode !== 'scratch' && requireUnique && this.drawnPool.has(name)) continue;
 
                 pool.push(name);
             }
@@ -486,6 +561,216 @@ class RandomGeneratorApp {
                 tier: tierInfo,
                 value: res
             });
+        });
+
+        this.saveHistory();
+        this.renderHistory();
+    }
+
+    // --- SCRATCH CARD LOGIC ---
+    generateScratchGrid() {
+        if (this.isSpinning) return;
+
+        // Ensure Audio context
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
+
+        const pool = this.buildPool();
+        if (pool.length === 0) {
+            alert(`Không có giải thưởng trống để phát thẻ cào!`);
+            return;
+        }
+
+        // Show grid
+        document.getElementById('scratchGridWrapper').classList.remove('hidden');
+        document.getElementById('scratchContainer').classList.add('hidden');
+
+        // Populate grid
+        const scratchGrid = document.getElementById('scratchGrid');
+        scratchGrid.innerHTML = '';
+        
+        // Shuffle pool so cards are unpredictable instead of sequential
+        const shuffledPool = [...pool].sort(() => Math.random() - 0.5);
+
+        // Render exactly as many cards as valid un-picked items in the pool
+        shuffledPool.forEach((prizeValue, index) => {
+            const card = document.createElement('div');
+            card.className = 'mystery-card';
+            card.innerHTML = `
+                <div style="position: relative; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
+                    <i class="fa-solid fa-suitcase" style="font-size: 6.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"></i>
+                    <span style="position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); color: #1e293b; font-size: 2.5rem; font-weight: 800;">?</span>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                this.expandScratchCard(prizeValue, card);
+            });
+            
+            scratchGrid.appendChild(card);
+        });
+    }
+
+    expandScratchCard(finalResult, cardElement) {
+        if (this.isSpinning) return;
+        this.isSpinning = true;
+
+        // Hide grid, show canvas
+        document.getElementById('scratchGridWrapper').classList.add('hidden');
+        document.getElementById('scratchContainer').classList.remove('hidden');
+
+        // Set backend layer text
+        document.getElementById('scratchPrizeText').textContent = finalResult;
+
+        // Mark the card as done so it won't be clickable if navigated back
+        cardElement.classList.add('scratched');
+
+        // Setup the Canvas
+        this.initScratchInteraction(finalResult);
+    }
+
+    initScratchInteraction(winningResult) {
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const container = document.getElementById('scratchContainer');
+
+        // Reset canvas state (remove fade)
+        canvas.classList.remove('fade-out');
+
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw silver coating
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw help text
+        ctx.font = 'bold 20px Arial';
+        ctx.fillStyle = '#4b5563';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('CÀO 50% ĐỂ MỞ THẺ', width / 2, height / 2);
+
+        let isDrawing = false;
+        const brushRadius = 25;
+
+        const getCoordinates = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        };
+
+        const handleStart = (e) => {
+            isDrawing = true;
+            handleScratch(e);
+        };
+
+        const handleScratch = (e) => {
+            if (!isDrawing) return;
+            e.preventDefault(); // Prevent scroll on mobile
+
+            const { x, y } = getCoordinates(e);
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, brushRadius, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        let revealed = false;
+
+        const handleEnd = () => {
+            if (!isDrawing || revealed) return;
+            isDrawing = false;
+
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const pixels = imageData.data;
+            let transparentPixels = 0;
+            const stride = 32;
+            const totalSamplePixels = pixels.length / 4 / stride;
+
+            for (let i = 0; i < pixels.length; i += 4 * stride) {
+                if (pixels[i + 3] < 128) {
+                    transparentPixels++;
+                }
+            }
+
+            const clearedPercentage = (transparentPixels / totalSamplePixels) * 100;
+
+            if (clearedPercentage > 50) {
+                revealed = true;
+                canvas.classList.add('fade-out');
+                
+                // Trigger win effects
+                this.finalizeScratchSpin(winningResult);
+
+                // Dettach events
+                cleanupEvents();
+            }
+        };
+
+        const cleanupEvents = () => {
+            canvas.removeEventListener('mousedown', handleStart);
+            canvas.removeEventListener('mousemove', handleScratch);
+            canvas.removeEventListener('mouseup', handleEnd);
+            canvas.removeEventListener('mouseleave', handleEnd);
+            
+            canvas.removeEventListener('touchstart', handleStart);
+            canvas.removeEventListener('touchmove', handleScratch);
+            canvas.removeEventListener('touchend', handleEnd);
+        };
+
+        // Attach fresh listeners
+        canvas.addEventListener('mousedown', handleStart);
+        canvas.addEventListener('mousemove', handleScratch);
+        canvas.addEventListener('mouseup', handleEnd);
+        canvas.addEventListener('mouseleave', handleEnd);
+        
+        canvas.addEventListener('touchstart', handleStart, { passive: false });
+        canvas.addEventListener('touchmove', handleScratch, { passive: false });
+        canvas.addEventListener('touchend', handleEnd);
+    }
+
+    finalizeScratchSpin(result) {
+        this.playSound('win');
+        this.triggerConfetti();
+
+        // Release lock and show back button
+        setTimeout(() => {
+            this.isSpinning = false;
+            const btnBackToGrid = document.getElementById('btnBackToGrid');
+            const remainingCards = document.querySelectorAll('.mystery-card:not(.scratched)');
+            
+            // Check if it's the last card
+            if (remainingCards.length === 0) {
+                btnBackToGrid.innerHTML = 'KẾT THÚC <i class="fa-solid fa-flag-checkered"></i>';
+                btnBackToGrid.style.background = '#e11d48'; // Red end color
+            } else {
+                btnBackToGrid.innerHTML = 'TIẾP TỤC CÀO <i class="fa-solid fa-rotate-left"></i>';
+                btnBackToGrid.style.background = '#4b5563'; // Normal gray
+            }
+
+            btnBackToGrid.classList.remove('hidden');
+        }, 1500);
+
+        // Save Results
+        const requireUnique = document.getElementById('uniqueToggle').checked;
+        const now = new Date().toLocaleString('vi-VN');
+
+        if (requireUnique) this.drawnPool.add(result);
+        
+        this.history.unshift({
+            time: now,
+            mode: 'MẢNG CÀO',
+            tier: '', // No tier directly selectable in scratch since it has its own list for now
+            value: result
         });
 
         this.saveHistory();

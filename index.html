@@ -25,6 +25,7 @@
             <div class="tabs">
                 <button class="tab-btn active" data-target="numberMode">Quay Số</button>
                 <button class="tab-btn" data-target="nameMode">Bốc Thăm</button>
+                <button class="tab-btn" data-target="scratchMode">Thẻ Cào</button>
             </div>
 
             <div id="numberMode" class="mode-section">
@@ -68,21 +69,27 @@
                     <small style="color:var(--text-muted); font-size:0.75rem; text-align:right" id="nameCount">0
                         mục</small>
                 </div>
-
+                
                 <!-- Prize Management Section -->
                 <div class="prize-management">
-                    <label
-                        style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:10px; display:block;">Cơ
-                        cấu giải thưởng</label>
+                    <label style="font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:10px; display:block;">Cơ cấu giải thưởng</label>
                     <div class="prize-list" id="prizeList">
                         <!-- Items injected by JS -->
                     </div>
-                    <button class="btn-add-prize" id="btnAddPrize"><i class="fa-solid fa-plus"></i> Thêm hạng
-                        giải</button>
+                    <button class="btn-add-prize" id="btnAddPrize"><i class="fa-solid fa-plus"></i> Thêm hạng giải</button>
                 </div>
             </div>
 
-            <div class="row-group" style="margin-top:10px;">
+            <div id="scratchMode" class="mode-section hidden">
+                <div class="input-group">
+                    <label>Danh sách giải sẽ giấu (mỗi ô 1 dòng)</label>
+                    <textarea id="scratchList" placeholder="Ví dụ:&#10;Trúng 500k&#10;Trượt&#10;Trượt"></textarea>
+                    <small style="color:var(--text-muted); font-size:0.75rem; text-align:right" id="scratchCount">0
+                        mục</small>
+                </div>
+            </div>
+
+            <div class="row-group" style="margin-top:10px;" id="spinConfigGroup">
                 <div class="input-group">
                     <label>Thời gian (giây)</label>
                     <div class="custom-stepper-wrapper">
@@ -109,7 +116,7 @@
                 </div>
             </div>
 
-            <div class="input-group">
+            <div class="input-group" id="blacklistGroup">
                 <label>Loại trừ (cách nhau bởi dấu phẩy)</label>
                 <input type="text" id="blacklist" placeholder="Ví dụ: 13, 42, Hùng">
             </div>
@@ -131,11 +138,17 @@
             </div>
 
             <div class="top-controls">
+                <button class="icon-btn" id="btnToggleLeft" title="Ẩn/Hiện Cài đặt">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
                 <button class="icon-btn" id="btnSound" title="Bật/tắt âm thanh">
                     <i class="fa-solid fa-volume-high"></i>
                 </button>
                 <button class="icon-btn" id="btnFullscreen" title="Toàn màn hình">
                     <i class="fa-solid fa-expand"></i>
+                </button>
+                <button class="icon-btn" id="btnToggleRight" title="Ẩn/Hiện Lịch sử">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
             </div>
 
@@ -144,7 +157,26 @@
                 <div class="result-item" id="mainResult">000</div>
             </div>
 
+            <div class="scratch-grid-wrapper hidden" id="scratchGridWrapper">
+                <div class="scratch-grid" id="scratchGrid">
+                    <!-- Các thẻ bí ẩn được sinh ra bằng JS ở đây -->
+                </div>
+            </div>
+
+            <div class="scratch-container hidden" id="scratchContainer">
+                <!-- Lớp dưới cùng chứa kết quả giải thưởng -->
+                <div class="result-layer" id="scratchResultLayer">
+                    <h2 id="scratchPrizeText">Bí ẩn</h2>
+                </div>
+                <!-- Lớp canvas phủ bạc đè lên -->
+                <canvas id="scratchCanvas"></canvas>
+            </div>
+
             <button class="btn-spin" id="btnSpin">QUAY NGAY <i class="fa-solid fa-rotate-right"></i></button>
+            <div class="scratch-actions hidden" id="scratchActions">
+                <button class="btn-spin" id="btnCreateScratch" style="background:var(--secondary); font-size:1.5rem; padding: 15px 40px;">SINH DÀN THẺ <i class="fa-solid fa-ticket"></i></button>
+                <button class="btn-spin hidden" id="btnBackToGrid" style="background:#4b5563; font-size:1.5rem; padding: 15px 40px; margin-left: 10px;">TIẾP TỤC CÀO <i class="fa-solid fa-rotate-left"></i></button>
+            </div>
         </main>
 
         <!-- RIGHT: History -->
