@@ -198,6 +198,11 @@ class RandomGeneratorApp {
         filterOdd.addEventListener('change', () => { if (filterOdd.checked) filterEven.checked = false; });
         filterEven.addEventListener('change', () => { if (filterEven.checked) filterOdd.checked = false; });
 
+        const scratchFilterOdd = document.getElementById('scratchFilterOdd');
+        const scratchFilterEven = document.getElementById('scratchFilterEven');
+        scratchFilterOdd.addEventListener('change', () => { if (scratchFilterOdd.checked) scratchFilterEven.checked = false; });
+        scratchFilterEven.addEventListener('change', () => { if (scratchFilterEven.checked) scratchFilterOdd.checked = false; });
+
         // Custom Stepper Logic
         document.querySelectorAll('.btn-step').forEach(btn => {
             btn.addEventListener('click', (e) => {

@@ -88,13 +88,25 @@
                     <div class="input-group">
                         <label>Từ (Min)</label>
                         <div class="custom-stepper-wrapper">
-                            <input type="number" id="scratchNumMin" placeholder="Trống">
+                            <input type="number" id="scratchNumMin" placeholder="Trống" value="1">
+                            <div class="stepper-controls">
+                                <button type="button" class="btn-step up" data-target="scratchNumMin"><i
+                                        class="fa-solid fa-caret-up"></i></button>
+                                <button type="button" class="btn-step down" data-target="scratchNumMin"><i
+                                        class="fa-solid fa-caret-down"></i></button>
+                            </div>
                         </div>
                     </div>
                     <div class="input-group">
                         <label>Đến (Max)</label>
                         <div class="custom-stepper-wrapper">
-                            <input type="number" id="scratchNumMax" placeholder="Trống">
+                            <input type="number" id="scratchNumMax" placeholder="Trống" value="100">
+                            <div class="stepper-controls">
+                                <button type="button" class="btn-step up" data-target="scratchNumMax"><i
+                                        class="fa-solid fa-caret-up"></i></button>
+                                <button type="button" class="btn-step down" data-target="scratchNumMax"><i
+                                        class="fa-solid fa-caret-down"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
