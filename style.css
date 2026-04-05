@@ -493,7 +493,7 @@ input[type="checkbox"]:checked+.toggle-switch::after {
 }
 
 #scratchPrizeText {
-    font-size: 4.5rem;
+    font-size: 7.5rem;
     font-family: var(--font-display);
     font-weight: 700;
     text-shadow: 0 0 10px var(--primary);
@@ -838,5 +838,118 @@ input[type="checkbox"]:checked+.toggle-switch::after {
     50% {
         opacity: 1;
         text-shadow: 0 0 20px rgba(236, 72, 153, 0.8);
+    }
+}
+
+/* --- RESPONSIVE MOBILE LAYOUT --- */
+@media (max-width: 992px) {
+    /* Stack Layout instead of 3 Columns */
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 10px;
+        gap: 15px;
+    }
+    
+    /* Allow components to grow naturally */
+    .glass-panel {
+        overflow-y: visible;
+        height: auto;
+    }
+    
+    /* Hide Sidebars when Collapsed */
+    .app-container.left-collapsed .control-panel {
+        display: none;
+    }
+    
+    .app-container.right-collapsed .history-sidebar {
+        display: none;
+    }
+
+    /* Main Board Focus */
+    .main-board {
+        flex: 1;
+        min-height: 60vh;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .result-display {
+        min-height: auto;
+    }
+
+    /* Resize Text dynamically */
+    .result-text {
+        font-size: 15vw;
+    }
+    
+    .sub-result {
+        font-size: 8vw;
+    }
+
+    /* Scratch Canvas constraints */
+    .scratch-container {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        aspect-ratio: 1;
+    }
+    
+    canvas#scratchCanvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* Responsive Grid for Mystery Cards */
+    .scratch-grid-wrapper {
+        margin: 0 auto;
+        padding: 10px;
+        width: 100%;
+    }
+    
+    .scratch-grid {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .mystery-card {
+        height: 80px;
+    }
+    
+    .mystery-card i {
+        font-size: 3.5rem !important;
+    }
+    
+    .mystery-card span {
+        font-size: 1.5rem !important;
+    }
+
+    /* UI Size Scaling */
+    .btn-spin, .btn-primary {
+        padding: 15px 20px !important;
+        font-size: 1.2rem !important;
+    }
+    
+    .top-controls .icon-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+
+    .prize-neon-heading {
+        font-size: 1.5rem;
+    }
+
+    .prize-selector-wrapper {
+        top: 70px; /* Xích xuống một chút trên mobile */
+        left: 50%;
+        transform: translateX(-50%); /* Căn giữa cho đẹp trên đt */
+        width: max-content;
     }
 }

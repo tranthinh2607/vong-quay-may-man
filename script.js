@@ -49,6 +49,12 @@ class RandomGeneratorApp {
 
     initDOM() {
         this.appContainer = document.getElementById('appContainer');
+        
+        // Auto-collapse sidebars on mobile devices
+        if (window.innerWidth <= 992) {
+            this.appContainer.classList.add('left-collapsed', 'right-collapsed');
+        }
+
         this.resultDisplay = document.getElementById('resultDisplay');
         this.btnSpin = document.getElementById('btnSpin');
         this.historyList = document.getElementById('historyList');
@@ -117,12 +123,29 @@ class RandomGeneratorApp {
                     prizeSelectorWrapper.classList.add('hidden'); // Scratch uses internal list
                     prizeHeading.style.display = 'none';
                     this.resultDisplay.classList.add('hidden');
-                    document.getElementById('scratchGridWrapper').classList.add('hidden');
-                    scratchContainer.classList.add('hidden');
-                    document.getElementById('scratchActions').classList.remove('hidden');
+                    
                     this.btnSpin.classList.add('hidden');
-                    btnCreateScratch.classList.remove('hidden');
-                    document.getElementById('btnBackToGrid').classList.add('hidden');
+                    document.getElementById('scratchActions').classList.remove('hidden');
+                    spinConfigGroup.classList.add('hidden');
+                    blacklistGroup.classList.add('hidden');
+                    
+                    const hasCards = document.querySelectorAll('.mystery-card').length > 0;
+                    const remainingCards = document.querySelectorAll('.mystery-card:not(.scratched)').length;
+                    
+                    if (hasCards && remainingCards > 0) {
+                        // Restore the grid view if there are still cards to scratch
+                        document.getElementById('scratchGridWrapper').classList.remove('hidden');
+                        scratchContainer.classList.add('hidden');
+                        btnCreateScratch.classList.add('hidden');
+                        document.getElementById('btnBackToGrid').classList.add('hidden');
+                    } else {
+                        // Reset to the initial state to create a new grid
+                        document.getElementById('scratchGridWrapper').classList.add('hidden');
+                        scratchContainer.classList.add('hidden');
+                        btnCreateScratch.classList.remove('hidden');
+                        btnCreateScratch.disabled = false;
+                        document.getElementById('btnBackToGrid').classList.add('hidden');
+                    }
                     spinConfigGroup.classList.add('hidden');
                     blacklistGroup.classList.add('hidden');
                 }
@@ -492,15 +515,17 @@ class RandomGeneratorApp {
         // Presentation effect - Dim UI
         this.appContainer.classList.add('presentation-mode');
 
-        // Prepare display area
-        this.resultDisplay.innerHTML = '';
+        // Prepare display area without wiping the prizeHeading
+        const slotsContainer = document.getElementById('slotsContainer');
+        slotsContainer.innerHTML = '';
         const slots = [];
+
         for (let i = 0; i < count; i++) {
-            const el = document.createElement('div');
-            el.className = 'result-item';
-            el.textContent = '...';
-            this.resultDisplay.appendChild(el);
-            slots.push(el);
+            const slot = document.createElement('div');
+            slot.className = 'result-item';
+            slot.textContent = '...';
+            slotsContainer.appendChild(slot);
+            slots.push(slot);
         }
 
         const finalResults = [];
@@ -734,7 +759,7 @@ class RandomGeneratorApp {
 
             const clearedPercentage = (transparentPixels / totalSamplePixels) * 100;
 
-            if (clearedPercentage > 50) {
+            if (clearedPercentage > 40) {
                 revealed = true;
                 canvas.classList.add('fade-out');
                 
