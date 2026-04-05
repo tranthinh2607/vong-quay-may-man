@@ -493,7 +493,7 @@ input[type="checkbox"]:checked+.toggle-switch::after {
 }
 
 #scratchPrizeText {
-    font-size: 7.5rem;
+    font-size: 7.0rem;
     font-family: var(--font-display);
     font-weight: 700;
     text-shadow: 0 0 10px var(--primary);

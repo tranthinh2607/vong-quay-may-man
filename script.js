@@ -398,26 +398,75 @@ class RandomGeneratorApp {
     playSound(type) {
         if (!this.soundEnabled) return;
 
-        const oscillator = this.audioCtx.createOscillator();
         const gainNode = this.audioCtx.createGain();
-
-        oscillator.connect(gainNode);
         gainNode.connect(this.audioCtx.destination);
 
-        if (type === 'tick') {
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(800, this.audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.05, this.audioCtx.currentTime);
-            oscillator.start();
-            oscillator.stop(this.audioCtx.currentTime + 0.05);
-        } else if (type === 'win') {
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(400, this.audioCtx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(800, this.audioCtx.currentTime + 0.5);
-            gainNode.gain.setValueAtTime(0.2, this.audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 1);
-            oscillator.start();
-            oscillator.stop(this.audioCtx.currentTime + 1);
+        if (type === 'tick' || type === 'win') {
+            const oscillator = this.audioCtx.createOscillator();
+            oscillator.connect(gainNode);
+
+            if (type === 'tick') {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(800, this.audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.05, this.audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(this.audioCtx.currentTime + 0.05);
+            } else if (type === 'win') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(400, this.audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(800, this.audioCtx.currentTime + 0.5);
+                gainNode.gain.setValueAtTime(0.2, this.audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 1);
+                oscillator.start();
+                oscillator.stop(this.audioCtx.currentTime + 1);
+            }
+        } else if (type === 'scratch') {
+            // Tearing / Scratching paper/cardboard effect
+            const bufferSize = this.audioCtx.sampleRate * 0.12; 
+            const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                // Chunky noise for grit and paper fibers breaking
+                data[i] = (Math.random() * 2 - 1) * (Math.random() > 0.2 ? 1 : 0);
+            }
+            const noise = this.audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            // Bandpass filter sweeping downwards to simulate a quick "rip"
+            const filter = this.audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            const startFreq = 1800 + Math.random() * 400;
+            filter.frequency.setValueAtTime(startFreq, this.audioCtx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(250, this.audioCtx.currentTime + 0.12);
+            filter.Q.value = 1.2;
+
+            noise.connect(filter);
+            filter.connect(gainNode);
+
+            // Punchy attack with smooth fade out
+            gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.8, this.audioCtx.currentTime + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.12);
+
+            // Nasty sawtooth crunch at the bottom for thick ripping texture
+            const osc = this.audioCtx.createOscillator();
+            const oscGain = this.audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100 + Math.random() * 50, this.audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, this.audioCtx.currentTime + 0.08);
+            
+            osc.connect(oscGain);
+            oscGain.connect(this.audioCtx.destination);
+            
+            oscGain.gain.setValueAtTime(0, this.audioCtx.currentTime);
+            oscGain.gain.linearRampToValueAtTime(0.2, this.audioCtx.currentTime + 0.01);
+            oscGain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.08);
+
+            osc.start(this.audioCtx.currentTime);
+            osc.stop(this.audioCtx.currentTime + 0.08);
+            
+            noise.start(this.audioCtx.currentTime);
+            noise.stop(this.audioCtx.currentTime + 0.12);
         }
     }
 
@@ -727,6 +776,8 @@ class RandomGeneratorApp {
             handleScratch(e);
         };
 
+        let lastSoundTime = 0;
+
         const handleScratch = (e) => {
             if (!isDrawing) return;
             e.preventDefault(); // Prevent scroll on mobile
@@ -737,6 +788,12 @@ class RandomGeneratorApp {
             ctx.beginPath();
             ctx.arc(x, y, brushRadius, 0, Math.PI * 2);
             ctx.fill();
+
+            const now = Date.now();
+            if (now - lastSoundTime > 80) { // Throttle sound
+                this.playSound('scratch');
+                lastSoundTime = now;
+            }
         };
 
         let revealed = false;
