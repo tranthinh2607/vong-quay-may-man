@@ -27,6 +27,7 @@
                 <button class="tab-btn active" data-target="numberMode">Quay Số</button>
                 <button class="tab-btn" data-target="nameMode">Bốc Thăm</button>
                 <button class="tab-btn" data-target="scratchMode">Thẻ Cào</button>
+                <button class="tab-btn" data-target="packMode"><i class="fa-solid fa-box-open"></i> Mở Pack</button>
             </div>
 
             <div id="numberMode" class="mode-section">
@@ -124,6 +125,73 @@
                 </div>
             </div>
 
+            <div id="packMode" class="mode-section hidden">
+                <!-- Pack Display Count Selector (Random độc bản màu & linh thú) -->
+                <div class="input-group">
+                    <label><i class="fa-solid fa-boxes-stacked"></i> Số lượng gói bài hiển thị (Random không trùng màu & nhân vật)</label>
+                    <div class="pack-count-wrapper">
+                        <div class="pack-count-selector" id="packsDisplayCountSelector">
+                            <button type="button" class="pack-display-btn active" data-count="4">4 Gói</button>
+                            <button type="button" class="pack-display-btn" data-count="6">6 Gói</button>
+                            <button type="button" class="pack-display-btn" data-count="8">8 Gói</button>
+                            <button type="button" class="pack-display-btn" data-count="12">12 Gói</button>
+                        </div>
+                        <div class="custom-card-count-input">
+                            <span class="count-input-label">Hoặc gõ số:</span>
+                            <div class="custom-stepper-wrapper" style="flex: 1; min-width: 90px;">
+                                <input type="number" id="packDisplayCountInput" min="1" max="200" placeholder="Số gói..." value="4">
+                                <div class="stepper-controls">
+                                    <button type="button" class="btn-step up" data-target="packDisplayCountInput"><i class="fa-solid fa-caret-up"></i></button>
+                                    <button type="button" class="btn-step down" data-target="packDisplayCountInput"><i class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <span style="font-size: 0.72rem; color: var(--text-muted);">Mỗi gói có 1 màu & 1 nhân vật riêng biệt</span>
+                        <button type="button" id="btnRerollPacks" class="btn-text-action" title="Xáo trộn ngẫu nhiên lại màu sắc và nhân vật của các gói bài">
+                            <i class="fa-solid fa-shuffle"></i> Đổi ngẫu nhiên
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cards per Pack (3 thẻ, 5 thẻ hoặc gõ số vào) -->
+                <div class="input-group">
+                    <label><i class="fa-solid fa-copy"></i> Số lượng thẻ trong 1 gói</label>
+                    <div class="pack-count-wrapper">
+                        <div class="pack-count-selector">
+                            <button type="button" class="pack-count-btn" data-count="3">3 Thẻ</button>
+                            <button type="button" class="pack-count-btn active" data-count="5">5 Thẻ</button>
+                        </div>
+                        <div class="custom-card-count-input">
+                            <span class="count-input-label">Hoặc gõ số:</span>
+                            <div class="custom-stepper-wrapper" style="flex: 1; min-width: 90px;">
+                                <input type="number" id="packCustomCountInput" min="1" max="50" placeholder="Số khác..." value="5">
+                                <div class="stepper-controls">
+                                    <button type="button" class="btn-step up" data-target="packCustomCountInput"><i class="fa-solid fa-caret-up"></i></button>
+                                    <button type="button" class="btn-step down" data-target="packCustomCountInput"><i class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách tên hay ký tự gõ vào (Thay thế cho God Pack Mode & Drop Rate Table) -->
+                <div class="input-group" style="margin-top: 15px;">
+                    <div class="custom-deck-header">
+                        <label><i class="fa-solid fa-pen-to-square"></i> Danh sách giải thưởng / tên thẻ (mỗi dòng 1 mục)</label>
+                        <button type="button" id="btnLoadSampleNames" class="btn-text-action" title="Nạp danh sách giải mẫu">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Nạp mẫu
+                        </button>
+                    </div>
+                    <textarea id="packNamesList" rows="8" placeholder="Gõ tên giải thưởng hoặc ký tự bạn muốn mở ra, mỗi dòng 1 mục."></textarea>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 4px;">
+                        <small style="color:var(--text-muted); font-size:0.75rem;" id="packNamesCount">0 mục</small>
+                        <small style="color:var(--secondary); font-size:0.75rem;">Mỗi thẻ mở ra sẽ hiển thị tên này</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="row-group" style="margin-top:10px;" id="spinConfigGroup">
                 <div class="input-group">
                     <label>Thời gian (giây)</label>
@@ -217,6 +285,160 @@
                 <button class="btn-spin hidden" id="btnBackToGrid"
                     style="background:#4b5563; font-size:1.5rem; padding: 15px 40px; margin-left: 10px;">TIẾP TỤC CÀO <i
                         class="fa-solid fa-rotate-left"></i></button>
+            </div>
+            <!-- POKEMON BOOSTER PACK OPENING CONTAINER -->
+            <div class="pack-opening-container hidden" id="packOpeningContainer">
+                
+                <!-- STAGE 1: Xuất hiện nhiều gói nhiều màu cùng lúc để chọn ra 1 gói -->
+                <div class="packs-choose-stage" id="packsChooseStage">
+                    <div class="packs-choose-header">
+                        <h2 class="packs-choose-title" id="packsChooseTitle"><i class="fa-solid fa-gift"></i> CHỌN 1 TRONG 4 GÓI BÀI MAY MẮN</h2>
+                        <p class="packs-choose-desc">Mỗi gói sở hữu một màu sắc và linh thú may mắn riêng biệt, hoàn toàn không trùng nhau!</p>
+                    </div>
+
+                    <div class="packs-showcase-grid" id="packsShowcaseGrid">
+                        <!-- Sẽ được tạo động ngẫu nhiên không trùng màu & nhân vật bởi JavaScript -->
+                    </div>
+                </div>
+
+                <!-- STAGE 2: Gói đã chọn đưa ra sân khấu chính để Kéo Xé -->
+                <div class="pack-stage hidden" id="packStage">
+                    <div class="pack-stage-topbar">
+                        <button type="button" class="btn-back-packs" id="btnBackToPacks" title="Quay lại chọn 1 trong 4 gói">
+                            <i class="fa-solid fa-arrow-left"></i> Chọn gói khác
+                        </button>
+                        <span class="active-pack-badge" id="activePackBadge">Gói Vàng May Mắn</span>
+                    </div>
+
+                    <div class="pack-perspective-wrap" id="packPerspectiveWrap">
+                        <div class="booster-pack" id="boosterPack" data-theme="gold">
+                            <!-- Cinematic Bursting Light Flare & Bloom when torn -->
+                            <div class="pack-glow-beam" id="packGlowBeam">
+                                <div class="pack-flare-core"></div>
+                                <div class="pack-flare-streak"></div>
+                                <div class="pack-flare-rays"></div>
+                            </div>
+
+                            <!-- Laser slit flash along the tear seam -->
+                            <div class="pack-tear-flash" id="packTearFlash"></div>
+
+                            <!-- Top Crimp (Tearable part with interactive drag) -->
+                            <div class="pack-top-crimp" id="packTopCrimp" title="Kéo chuột hoặc cảm ứng xé ngang phần đầu">
+                                <div class="crimp-serration-top"></div>
+                                <div class="crimp-texture"></div>
+                                <div class="tear-guide" id="tearGuide">
+                                    <span class="tear-line-dashed"></span>
+                                    <div class="tear-track" id="tearTrack">
+                                        <div class="tear-progress-fill" id="tearProgressFill"></div>
+                                        <div class="tear-cutter-handle" id="tearCutterHandle">
+                                            <i class="fa-solid fa-scissors"></i>
+                                        </div>
+                                    </div>
+                                    <div class="tear-prompt-tag" id="tearPromptTag">
+                                        <i class="fa-solid fa-arrow-right"></i> KÉO NGANG ĐỂ XÉ
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Main Foil Pack Body -->
+                            <div class="pack-body" id="packBody">
+                                <div class="foil-shimmer-layer"></div>
+                                <div class="pack-art-header">
+                                    <span class="pack-brand-badge" id="packBrandBadge">LUCKY PACK</span>
+                                    <span class="pack-cards-badge" id="packBadgeCount">5 THẺ</span>
+                                </div>
+                                
+                                <!-- Center Cute Mascot Artwork with Glowing Halo -->
+                                <div class="pack-art-character" id="packArtCharacter">
+                                    <div class="mascot-glow-ring"></div>
+                                    <img id="packArtMascotImg" src="https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/25.png" alt="Cute Mascot" draggable="false" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png';">
+                                </div>
+
+                                <div class="pack-art-footer">
+                                    <div class="pack-series-title" id="packSeriesTitle">LUCKY GOLD</div>
+                                    <div class="pack-sub-title" id="packSubTitle">Phiên Bản May Mắn</div>
+                                    <div class="pack-pokeball-icon">
+                                        <i class="fa-solid fa-gift"></i>
+                                    </div>
+                                </div>
+                                <div class="pack-bottom-crimp">
+                                    <div class="crimp-texture"></div>
+                                    <div class="crimp-serration-bottom"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pack-actions" id="packInitialActions">
+                        <button type="button" class="btn-spin btn-tear-pack" id="btnTearPack">
+                            <i class="fa-solid fa-scissors"></i> XÉ GÓI NGAY
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stage 3: Card Reveal & Inspection Stage -->
+                <div class="cards-stage hidden" id="cardsStage">
+                    <div class="cards-stage-header">
+                        <div class="card-progress-pill" id="cardProgressPill">
+                            <i class="fa-solid fa-layer-group"></i> Thẻ 1 / 5
+                        </div>
+                        <div class="cards-view-controls">
+                            <button type="button" class="btn-view-mode active" id="btnViewStack" title="Chế độ xấp bài (lật từng lá)">
+                                <i class="fa-solid fa-clone"></i> Xấp bài
+                            </button>
+                            <button type="button" class="btn-view-mode" id="btnViewSpread" title="Chế độ dàn hàng (chọn lật thẻ bất kỳ)">
+                                <i class="fa-solid fa-table-cells"></i> Dàn hàng
+                            </button>
+                            <button type="button" class="btn-reveal-all" id="btnRevealAll" title="Lật nhanh tất cả thẻ">
+                                <i class="fa-solid fa-bolt"></i> Lật nhanh tất cả
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-stack-viewport" id="cardStackViewport">
+                        <div class="card-stack view-stack" id="cardStack">
+                            <!-- Cards dynamically generated here -->
+                        </div>
+                    </div>
+
+                    <div class="cards-stage-footer" id="cardsStageFooter">
+                        <div class="card-hint-text" id="cardHintText">
+                            <i class="fa-solid fa-hand-pointer"></i> Nhấn vào thẻ hoặc vùng xung quanh để lật bài
+                        </div>
+                        <div class="card-footer-btns">
+                            <button type="button" class="btn-action-flip" id="btnActionFlip">
+                                <i class="fa-solid fa-rotate"></i> Lật thẻ này
+                            </button>
+                            <button type="button" class="btn-next-card hidden" id="btnNextCard">
+                                <i class="fa-solid fa-arrow-right"></i> Thẻ tiếp theo
+                            </button>
+                            <button type="button" class="btn-finish-summary hidden" id="btnFinishSummary">
+                                <i class="fa-solid fa-trophy"></i> Xem tổng kết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 4: Pack Summary Stage -->
+                <div class="summary-stage hidden" id="summaryStage">
+                    <div class="summary-header">
+                        <h2 class="summary-title"><i class="fa-solid fa-trophy"></i> BỘ SƯU TẬP VỪA MỞ ĐƯỢC</h2>
+                        <p class="summary-subtitle" id="summarySubtitle">Chiêm ngưỡng các lá bài may mắn từ gói vừa rồi!</p>
+                    </div>
+
+                    <div class="summary-cards-grid" id="summaryCardsGrid">
+                        <!-- Summary cards generated here -->
+                    </div>
+
+                    <div class="summary-actions">
+                        <button type="button" class="btn-summary-action btn-summary-primary" id="btnOpenNextPack">
+                            <i class="fa-solid fa-box-open"></i> Mở Gói Tiếp Theo
+                        </button>
+                        <button type="button" class="btn-summary-action btn-summary-secondary" id="btnReplayPack">
+                            <i class="fa-solid fa-rotate-left"></i> Xem Lại Hiệu Ứng
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
 
